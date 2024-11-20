@@ -1,70 +1,139 @@
-# Getting Started with Create React App
+# Photo Repository
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![Photo Repository Screenshot](/imgs/photo-repo-demo.png)
 
-## Available Scripts
+![Photo Repository On-Click Screenshot](/imgs/photo-on-click-demo.png)
 
-In the project directory, you can run:
+## About the Project
 
-### `npm start`
+**Photo Repository** is a web application designed to demonstrate the deployment of AWS services for IT231. It provides users with a platform to upload, store, and view images. The project showcases the integration of AWS services, including:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **React Frontend**: The web interface for users to interact with the photo repository.
+- **Flask Backend**: Facilitates communication between the frontend and the AWS services.
+- **S3 Bucket**: Stores uploaded images and makes them accessible for display on the website.
+- **EC2 Instance**: Hosts the frontend and backend services in the cloud.
+- **VPC (Virtual Private Cloud)**: Manages the network connectivity between AWS resources and ensures secure, public access to the application.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Features
 
-### `npm test`
+- Upload photos to the repository.
+- View photos in a responsive gallery with a lightbox feature.
+- Backend integration with AWS S3 for storage.
+- Deployment-ready architecture for AWS using EC2 and VPC.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Running Locally
 
-### `npm run build`
+To test the app locally in its current "dev" state, follow these instructions:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Node.js** (v16+): [Install Node.js](https://nodejs.org/)
+- **Python** (3.8+): [Install Python](https://www.python.org/)
+- **Pip**: Comes with Python, but ensure it's installed (`pip --version`).
+- **Virtual Environment**: (Optional) Recommended for Python dependencies.
+- **SQLite3**: You can quickly check if you have SQLite3 installed by running: `sqlite3 --version`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Step 1: Clone the Repository
 
-### `npm run eject`
+```bash
+git clone https://github.com/ochrebasis/photo-repository-react-app.git
+cd photo-repository
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Step 2: Run the Frontend (React)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Navigate to the `frontend/` directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+4. Open your browser at <http://localhost:3000>.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Step 3: Run the Backend (Flask)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. Navigate to the `backend/` directory:
+   ```bash
+   cd ../backend
+   ```
+2. Create and activate a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # macOS/Linux
+   venv\Scripts\activate     # Windows
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Start the Flask server:
+   ```bash
+   python app_local.py
+   ```
+5. The backend will run on <http://localhost:5000>.
+6. Any images uploaded to the website will be stored locally in `backend/uploads/`.
+7. Photo metadata will be saved in the `backend/photo_repo.db` SQLite database.
 
-## Learn More
+## Deployment on AWS
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To deploy this application on AWS, follow these steps:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Prerequisites
 
-### Code Splitting
+- **AWS Account**: Sign up at [AWS](https://aws.amazon.com/).
+- **AWS CLI**: Install and configure with `aws configure`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Step 1: Set Up the Backend (Flask)
 
-### Analyzing the Bundle Size
+1. **Create an EC2 Instance**:
+   - Launch an EC2 instance with a publicly accessible IP.
+   - Use an Ubuntu or Amazon Linux AMI.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+2. **Install Dependencies**:
+   SSH into the instance and install the required software:
+   ```bash
+   sudo apt update
+   sudo apt install python3 python3-pip
+   sudo pip3 install flask boto3
+   ```
 
-### Making a Progressive Web App
+3. **Deploy the Flask App**:
+   - Copy your `backend/` directory to the EC2 instance.
+   - Start the app using:
+     ```bash
+     python3 app_aws.py
+     ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+4. **Allow HTTP Traffic**:
+   - Configure the security group to allow traffic on port `5000` or use a reverse proxy (e.g., Nginx) to serve the app on port `80`.
 
-### Advanced Configuration
+### Step 2: Set Up the Frontend (React)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+1. **Build the React App**:
+   - Navigate to the `frontend/` directory and run:
+     ```bash
+     npm run build
+     ```
+   - This generates a production-ready app in the `frontend/build/` folder.
 
-### Deployment
+2. **Deploy to EC2**:
+   - Copy the `frontend/build/` folder to your EC2 instance.
+   - Serve it using a web server like Nginx or Apache.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Step 3: Configure the S3 Bucket
 
-### `npm run build` fails to minify
+1. **Create an S3 Bucket**:
+   - Name the bucket (e.g., `photo-repository-bucket`) and enable public access.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+2. **Update the Flask Backend**:
+   - Modify the Flask app to upload images to S3.
+   - Use AWS SDK (Boto3) to interact with the bucket.
+
+3. **Set Permissions**:
+   - Attach an IAM role to the EC2 instance with `AmazonS3FullAccess`.

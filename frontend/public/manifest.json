@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Photo Repository",
+  "name": "A simple photo repository, meant to demonstrate knowledge of AWS services!",
   "icons": [
     {
       "src": "favicon.ico",

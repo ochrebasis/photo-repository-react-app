@@ -1,0 +1,194 @@
+/* General styles */
+body {
+  margin: 0;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background: linear-gradient(150deg, #26408B, #C2E7D9);
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* App container */
+.app {
+  max-width: 800px;
+  margin: 20px;
+  padding: 20px;
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* Headings */
+h1 {
+  margin-bottom: 20px;
+  font-size: 2.5rem;
+  color: #444;
+}
+
+h2 {
+  margin-top: 20px;
+  font-size: 1.8rem;
+  color: #666;
+}
+
+/* Upload form */
+.upload-form {
+  margin-bottom: 20px;
+}
+
+.upload-form input[type="file"] {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.upload-form button {
+  padding: 10px 20px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.upload-form button:disabled {
+  background-color: #ccc;
+}
+
+.upload-form button:hover:not(:disabled) {
+  background-color: #e65a50;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
+
+/* Photo gallery */
+.gallery {
+  margin-top: 20px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.photo-grid img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.empty-gallery {
+  color: #888;
+  font-size: 1.2rem;
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.lightbox-content img {
+  max-width: 100%; /* Scale down width to fit container */
+  max-height: 100%; /* Scale down height to fit container */
+  object-fit: contain; /* Ensures the entire image fits within the available space */
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  text-align: center;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  text-align: center;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.photo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Ensure the wrapper fills the grid cell */
+}
+
+.photo-grid img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Ensures the image fits properly inside its container */
+}
+
+/* Header container */
+.header {
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Vertically center items */
+  justify-content: center; /* Align items to the left */
+  margin-bottom: 20px; /* Add some spacing below the header */
+}
+
+/* Logo/Icon styles */
+.header-icon {
+  width: 75px; /* Adjust the size of the logo */
+  height: 75px;
+  margin-right: 10px; /* Add spacing between the logo and text */
+}
+
+/* Header text styles */
+.header h1 {
+  margin: 0; /* Remove default margin from the <h1> tag */
+  font-size: 2.5rem; /* Adjust text size if necessary */
+  color: #444; /* Match the overall theme */
+}
