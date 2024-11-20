@@ -5,11 +5,16 @@ from werkzeug.utils import secure_filename
 from utils.sqlite_utils import initialize_db, save_photo_to_db, list_photos_from_db
 
 UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}  # Allowed file extensions
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
 initialize_db()  # Initialize the database when the app starts
 CORS(app)  # Enable CORS for all routes
+
+def allowed_file(filename):
+    """Check if a file is an allowed image type."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Serve uploaded files
 @app.route('/uploads/<filename>')
@@ -24,6 +29,10 @@ def upload_photo():
     photo = request.files['photo']
     if photo.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+    
+    if not allowed_file(photo.filename):
+        return jsonify({'error': 'Invalid file type. Only .jpg, .jpeg, .png, .gif are allowed.'}), 400
+
 
     # Secure the filename and save locally
     filename = secure_filename(photo.filename)

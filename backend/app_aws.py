@@ -10,8 +10,15 @@ CORS(app)  # Enable CORS for all routes
 AWS_REGION = "us-east-1"  # Replace with your AWS region
 S3_BUCKET = "your-photo-repo-bucket"  # Replace with your S3 bucket name
 
+# Allowed extensions
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
+
 # Initialize S3 client
 s3_client = initialize_s3_client(AWS_REGION)
+
+def allowed_file(filename):
+    """Check if a file is an allowed image type."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST'])
 def upload_photo():
@@ -21,6 +28,9 @@ def upload_photo():
     photo = request.files['photo']
     if photo.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+    
+    if not allowed_file(photo.filename):
+        return jsonify({'error': 'Invalid file type. Only .jpg, .jpeg, .png, .gif are allowed.'}), 400
 
     # Generate a unique filename
     unique_filename = f"{uuid.uuid4()}-{photo.filename}"
