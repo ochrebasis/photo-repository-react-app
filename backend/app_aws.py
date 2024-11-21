@@ -2,13 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from utils.s3_utils import initialize_s3_client, upload_to_s3, list_s3_objects
 import uuid
+import os
+
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": FRONTEND_URL}})  # Enable CORS for all routes
 
 # AWS Configuration
-AWS_REGION = "us-east-1"  # Replace with your AWS region
-S3_BUCKET = "your-photo-repo-bucket"  # Replace with your S3 bucket name
+AWS_REGION = os.getenv('AWS_REGION')  # Replace with your AWS region
+S3_BUCKET = os.getenv('S3_BUCKET')  # Replace with your S3 bucket name
 
 # Allowed extensions
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
@@ -22,6 +25,9 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['POST'])
 def upload_photo():
+    MAX_FILE_SIZE = 35 * 1024 * 1024 # 35MB in bytes
+    MAX_STORAGE = 10 * 1024 * 1024 * 1024 # 10GB in bytes
+
     if 'photo' not in request.files:
         return jsonify({'error': 'No photo file provided'}), 400
 
@@ -31,6 +37,18 @@ def upload_photo():
     
     if not allowed_file(photo.filename):
         return jsonify({'error': 'Invalid file type. Only .jpg, .jpeg, .png, .gif are allowed.'}), 400
+    
+    # Check file size
+    photo.stream.seek(0, os.SEEK_END)  # Move the stream position to the end
+    file_size = photo.stream.tell()   # Get the current stream position as the size
+    photo.stream.seek(0)              # Reset the stream position to the beginning
+
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({'error': 'File size exceeds the 35MB limit'}), 413
+
+    total_storage_used = sum(obj['Size'] for obj in list_s3_objects(s3_client, S3_BUCKET))
+    if total_storage_used + file_size > MAX_STORAGE:
+        return jsonify({'error': 'Storage limit reached. Cannot upload more photos.'}), 403
 
     # Generate a unique filename
     unique_filename = f"{uuid.uuid4()}-{photo.filename}"
@@ -51,6 +69,23 @@ def list_photos():
         for idx, photo in enumerate(photos):
             photo['id'] = idx + 1
         return jsonify({'photos': photos}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/storage-stats', methods=['GET'])
+def get_storage_stats():
+    MAX_STORAGE = 10 * 1024 * 1024 * 1024  # 10GB in bytes
+
+    try:
+        # Calculate total storage used
+        total_storage_used = sum(obj['Size'] for obj in list_s3_objects(s3_client, S3_BUCKET))
+        remaining_storage = MAX_STORAGE - total_storage_used
+
+        return jsonify({
+            'total_storage': total_storage_used,
+            'remaining_storage': remaining_storage,
+            'max_storage': MAX_STORAGE
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -1,7 +1,16 @@
 import sqlite3
+import os
 from typing import List, Dict
 
 DATABASE = 'photo_repo.db'
+
+def calculate_total_storage() -> int:
+    """Calculate the total size of all stored photos in bytes."""
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT file_path FROM photos')
+        file_paths = cursor.fetchall()
+    return sum(os.path.getsize(row[0]) for row in file_paths if os.path.exists(row[0]))
 
 def initialize_db():
     """Initialize the database and create tables if they don't exist."""

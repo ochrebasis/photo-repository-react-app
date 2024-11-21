@@ -9,20 +9,39 @@ const App = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(''); // Error message
   const [lightbox, setLightbox] = useState({ isOpen: false, photo: null, style: {} }); // Lightbox state
+  const [storageStats, setStorageStats] = useState({ total: 0, remaining: 0, max: 0 });
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
   // Fetch photos from the backend
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/photos');
+        const response = await axios.get(`${BACKEND_URL}/photos`);
         setPhotos(response.data.photos);
       } catch (err) {
         console.error('Error fetching photos:', err);
         setError('Failed to fetch photos');
       }
     };
+
+    const fetchStorageStats = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/storage-stats`);
+        setStorageStats({
+          total: response.data.total_storage,
+          remaining: response.data.remaining_storage,
+          max: response.data.max_storage
+        });
+      } catch (err) {
+        console.error('Error fetching storage stats:', err);
+      }
+    };
+    
+    fetchStorageStats();
     fetchPhotos();
   }, []);
+
+  const storagePercentage = (storageStats.total / storageStats.max) * 100;
 
   // Handle file selection
   const handleFileChange = (event) => {
@@ -41,10 +60,10 @@ const App = () => {
     formData.append('photo', selectedFile);
 
     try {
-      await axios.post('http://127.0.0.1:5000/upload', formData, {
+      await axios.post(`${BACKEND_URL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const updatedPhotos = await axios.get('http://127.0.0.1:5000/photos');
+      const updatedPhotos = await axios.get(`${BACKEND_URL}/photos`);
       setPhotos(updatedPhotos.data.photos);
     } catch (err) {
       console.error('Error uploading photo:', err);
@@ -96,6 +115,19 @@ const App = () => {
         </header>
         <p>Hello! Welcome to my photo repository. If correctly deployed this server is using an <b>EC2 instance</b>, <b>S3 bucket</b> and <b>VPC</b> within AWS services to deliver you these images.</p>
         <p>Feel free to upload, if you'd like! Be mindful of what you decide to upload and how large the images sizes are!</p>
+        {/* Storage Usage Progress Bar */}
+        <div className="storage-progress">
+          <div className="progress-bar">
+            <div
+              className="progress"
+              style={{ width: `${storagePercentage}%` }}
+            >
+            </div>
+            <span className="progress-text">
+              Storage Usage: {((storageStats.total / (1024 * 1024 * 1024)).toFixed(2))}GB / 10GB
+            </span>
+          </div>
+        </div>
         {/* File Upload Form */}
         <div className="upload-form">
           <h2>Upload Photo</h2>
