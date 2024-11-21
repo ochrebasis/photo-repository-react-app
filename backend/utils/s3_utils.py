@@ -17,7 +17,13 @@ def upload_to_s3(s3_client, bucket_name: str, file, filename: str) -> str:
     Returns:
         str: Public URL of the uploaded file.
     """
-    s3_client.upload_fileobj(file, bucket_name, filename, ExtraArgs={'ACL': 'public-read'})
+    s3_client.upload_fileobj(
+        Fileobj=file,
+        Bucket=bucket_name,
+        Key=filename,
+        ExtraArgs={'ACL': 'public-read'},
+        Config=boto3.s3.transfer.TransferConfig(multipart_threshold=5 * 1024 * 1024)  # 5MB threshold
+    )
     return f"https://{bucket_name}.s3.{s3_client.meta.region_name}.amazonaws.com/{filename}"
 
 def list_s3_objects(s3_client, bucket_name: str):

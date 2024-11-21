@@ -11,6 +11,7 @@ const App = () => {
   const [lightbox, setLightbox] = useState({ isOpen: false, photo: null, style: {} }); // Lightbox state
   const [storageStats, setStorageStats] = useState({ total: 0, remaining: 0, max: 0 });
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+  const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB in bytes
 
   // Fetch photos from the backend
   useEffect(() => {
@@ -41,11 +42,20 @@ const App = () => {
     fetchPhotos();
   }, []);
 
+  // Helper to convert bytes to gigabytes
+  const bytesToGigabytes = (bytes) => (bytes / (1024 * 1024 * 1024)).toFixed(2);
   const storagePercentage = (storageStats.total / storageStats.max) * 100;
 
   // Handle file selection
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    const file = event.target.files[0];
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File size exceeds the 35MB limit');
+      setSelectedFile(null); // Clear the selection
+      return;
+    }
+    setSelectedFile(file);
+    setError(''); // Clear any previous errors
   };
 
   // Handle file upload
@@ -124,7 +134,7 @@ const App = () => {
             >
             </div>
             <span className="progress-text">
-              Storage Usage: {((storageStats.total / (1024 * 1024 * 1024)).toFixed(2))}GB / 10GB
+              Storage Usage: {bytesToGigabytes(storageStats.total)}GB / {bytesToGigabytes(storageStats.max)}GB
             </span>
           </div>
         </div>

@@ -1,8 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 from utils.s3_utils import initialize_s3_client, upload_to_s3, list_s3_objects
 import uuid
 import os
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],  # Global limits
+)
 
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
@@ -24,6 +32,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload', methods=['POST'])
+@limiter.limit("45 per hour")  # Custom limit for this endpoint
 def upload_photo():
     MAX_FILE_SIZE = 35 * 1024 * 1024 # 35MB in bytes
     MAX_STORAGE = 10 * 1024 * 1024 * 1024 # 10GB in bytes
