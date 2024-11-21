@@ -195,6 +195,7 @@ h2 {
 
 .storage-progress {
   margin: 20px 0;
+  position: relative; /* Create a positioning context for the progress bar */
 }
 
 .progress-bar {
@@ -223,5 +224,5 @@ h2 {
   font-size: 0.9em;
   font-weight: bold;
   white-space: nowrap; /* Prevent text wrapping */
-  z-index: 2; /* Ensure it is always on top of the progress bar */
+  pointer-events: none; /* Prevent the text from interfering with user interactions */
 }
