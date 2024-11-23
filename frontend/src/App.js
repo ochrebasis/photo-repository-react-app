@@ -10,14 +10,19 @@ const App = () => {
   const [error, setError] = useState(''); // Error message
   const [lightbox, setLightbox] = useState({ isOpen: false, photo: null, style: {} }); // Lightbox state
   const [storageStats, setStorageStats] = useState({ total: 0, remaining: 0, max: 0 });
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+  const [backendUrl, setBackendUrl] = useState('');
+  const [isBackendValidated, setIsBackendValidated] = useState(false);
+  const [inputUrl, setInputUrl] = useState('');
   const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB in bytes
 
   // Fetch photos from the backend
   useEffect(() => {
+
+    if (!isBackendValidated) return;
+
     const fetchPhotos = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/photos`);
+        const response = await axios.get(`${backendUrl}/photos`);
         setPhotos(response.data.photos);
       } catch (err) {
         console.error('Error fetching photos:', err);
@@ -27,7 +32,7 @@ const App = () => {
 
     const fetchStorageStats = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/storage-stats`);
+        const response = await axios.get(`${backendUrl}/storage-stats`);
         setStorageStats({
           total: response.data.total_storage,
           remaining: response.data.remaining_storage,
@@ -40,7 +45,23 @@ const App = () => {
     
     fetchStorageStats();
     fetchPhotos();
-  }, []);
+  }, [isBackendValidated, backendUrl]);
+
+  const validateBackend = async () => {
+    try {
+      const response = await axios.get(`${inputUrl}/photos`);
+      if (response.status === 200) {
+        setBackendUrl(inputUrl);
+        setIsBackendValidated(true);
+        setError('');
+      } else {
+        throw new Error('Invalid backend response');
+      }
+    } catch (err) {
+      console.error('Backend validation failed:', err);
+      setError('Unable to connect to the backend. Please check the URL and try again.');
+    }
+  };
 
   // Helper to convert bytes to gigabytes
   const bytesToGigabytes = (bytes) => (bytes / (1024 * 1024 * 1024)).toFixed(2);
@@ -70,10 +91,10 @@ const App = () => {
     formData.append('photo', selectedFile);
 
     try {
-      await axios.post(`${BACKEND_URL}/upload`, formData, {
+      await axios.post(`${backendUrl}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const updatedPhotos = await axios.get(`${BACKEND_URL}/photos`);
+      const updatedPhotos = await axios.get(`${backendUrl}/photos`);
       setPhotos(updatedPhotos.data.photos);
     } catch (err) {
       console.error('Error uploading photo:', err);
@@ -115,6 +136,28 @@ const App = () => {
   const closeLightbox = () => {
     setLightbox({ isOpen: false, photo: null, style: {} });
   };
+
+  if (!isBackendValidated) {
+    return (
+      <div className="app">
+        <header className="header">
+          <Logo className="header-icon" />
+          <h1>Photo Repository</h1>
+        </header>
+        <div className="backend-url-input">
+          <p>Please provide the IP address of the running backend server:</p>
+          <input
+            type="text"
+            placeholder="Enter backend URL (e.g., http://localhost:5000)"
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+          />
+          <button onClick={validateBackend}>Set Backend URL</button>
+          {error && <p className="error-message">{error}</p>}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
