@@ -1,6 +1,6 @@
 # Photo Repository
 
-![Photo Repository Demo Video](https://github.com/ochrebasis/photo-repository-react-app/raw/refs/heads/main/react-app-demo.mp4)
+https://github.com/user-attachments/assets/86121239-bb66-45d3-9233-94cc9c82edc3
 
 ![Photo Repository Screenshot](/imgs/photo-repo-demo.png)
 
